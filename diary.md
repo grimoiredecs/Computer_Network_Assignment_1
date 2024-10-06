@@ -5,3 +5,7 @@ I'm currently studying more fundamentally the P2P architecture, and how to actua
 Currently speaking, I'm deciding to use MongoDB for the backend
 
 Is implementing a GUI better?
+
+07/10/2024
+
+We've switched to python instead!
