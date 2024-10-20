@@ -9,3 +9,6 @@ Is implementing a GUI better?
 07/10/2024
 
 We've switched to python instead!
+
+20/10/2024 
+BACK FROM MIDTERM, FOCUS MORE ON THE ASSIGNMENT (1) NOW. Kent (Khôi) will take care of the second assignment (for now).
