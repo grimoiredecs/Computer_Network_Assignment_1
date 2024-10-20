@@ -12,3 +12,5 @@ We've switched to python instead!
 
 20/10/2024 
 BACK FROM MIDTERM, FOCUS MORE ON THE ASSIGNMENT (1) NOW. Kent (Khôi) will take care of the second assignment (for now).
+
+Note that the "DHT.py" is a rough and makeshift implementation of DHT (not quite related to out assignment).
