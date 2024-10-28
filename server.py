@@ -1,5 +1,5 @@
 from socket import*
-from threading import thread
+
 
 '''
 identifier includes both IP address
