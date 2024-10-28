@@ -24,13 +24,21 @@ where host is a string representing either a hostname in internet domain notatio
 like 'daring.cwi.nl' or an IPv4 address like '100.50.200.5', and port is an integer.
 
 SOCK_DGRAM
-- UDP socket type!
+- UDP protocol type!
 
 '''
+i = 0
+while i !=1:
+    i = input("Enter if you want to quit")
+    server_socket.bind(('', server_port))
 
-server_socket.bind(('', server_port))
-
-
+'''
+Enter if you want to quit
+Traceback (most recent call last):
+  File "C:\Users\khang\Documents\Github\Computer_Network_Assignment_1\server.py", line 33, in <module>
+    server_socket.bind(('', server_port))
+OSError: [WinError 10022] An invalid argument was supplied
+'''
 #how to make the process lives until a termination is entered??
 
 
