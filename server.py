@@ -1,2 +1,2 @@
-import socket
-from threading import thread 
+from socket import*
+from threading import thread
