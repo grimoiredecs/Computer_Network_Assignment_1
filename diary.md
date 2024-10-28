@@ -9,3 +9,6 @@ Is implementing a GUI better?
 07/10/2024
 
 We've switched to python instead!
+
+28/10/2024
+Back from therapy, let's go on to code again, enough delay!!!
