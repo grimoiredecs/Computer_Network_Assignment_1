@@ -33,10 +33,6 @@ while i !=1:
     server_socket.bind(('', server_port))
 
 '''
-Enter if you want to quit
-Traceback (most recent call last):
-  File "C:\Users\khang\Documents\Github\Computer_Network_Assignment_1\server.py", line 33, in <module>
-    server_socket.bind(('', server_port))
 OSError: [WinError 10022] An invalid argument was supplied
 '''
 #how to make the process lives until a termination is entered??
