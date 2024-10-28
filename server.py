@@ -27,11 +27,6 @@ SOCK_DGRAM
 - UDP protocol type!
 
 '''
-i = 0
-while i !=1:
-    i = input("Enter if you want to quit")
-    server_socket.bind(('', server_port))
-
 '''
 OSError: [WinError 10022] An invalid argument was supplied
 '''
