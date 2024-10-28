@@ -16,7 +16,23 @@ just simulating and experimenting purposes only
 '''
 server_port = 12000
 server_socket = socket(AF_INET, SOCK_DGRAM)
+'''
+Notes abbout the parameters:
+AF_INET - address family
+A pair (host, port) is used for the AF_INET address family, 
+where host is a string representing either a hostname in internet domain notation 
+like 'daring.cwi.nl' or an IPv4 address like '100.50.200.5', and port is an integer.
 
-server_socket.bind(('', server_port))#wrong syntax lmao
+SOCK_DGRAM
+- UDP socket type!
+
+'''
+
+server_socket.bind(('', server_port))
+
+
+#how to make the process lives until a termination is entered??
+
+
 print('The server is ready to receive')
 
