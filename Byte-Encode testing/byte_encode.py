@@ -29,7 +29,14 @@ Objects that are placed on PDF pages are called ‘marks’. The page surface is
 (source:  https://www.prepressure.com/pdf/basics/fileformat)
 
 '''
- 
+'''
 with open('Reference_NetApp.pdf', 'rb') as file: #raw byte reading
     raw_byte = file.read()  
     print(raw_byte)
+
+'''
+
+
+with open('new.txt','rb') as file:
+    raw_txt = file.read()
+    print(raw_txt)
