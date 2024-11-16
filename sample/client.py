@@ -27,6 +27,9 @@ def connect_server(threadnum, host, port):
     # TODO: wait for all threads to finish
     [t.join() for t in threads]
 
+    
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                         prog='Client',

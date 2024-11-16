@@ -42,4 +42,4 @@ byts = b'0x0009'
 with open('new.txt','rb') as file:
     raw_txt = file.read()
     print(raw_txt)
-print(bencode_.bdecode(open('alice.torrent','rb').read()))
+print((open('alice.torrent','rb').read()))
