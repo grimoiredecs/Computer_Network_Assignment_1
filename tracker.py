@@ -1,10 +1,7 @@
 import re
 import tor
-
 import socket
 from threading import Thread
-
-
 def new_connection(addr, conn):
     print(addr)
 
@@ -47,7 +44,5 @@ def perpetual_metainfo(data_queue):
             break
         data_queue.put(data + '\n')
 
-
-    
 if __main__ == "__main__":
     print("Hello World!")
