@@ -1,5 +1,6 @@
 import socket
 import time
+import hashlib
 import argparse
 
 from threading import Thread
@@ -16,6 +17,15 @@ def new_connection(tid, host, port):
        time.sleep(1)
  
     print('OK! I am ID={:d} done here'.format(tid))
+
+def send_request(tracker, file_):
+    with open(file_, mode = "r+" , encoding = "utf-8") as file_obj:
+        file_obj.truncate(file_.size + 1024)
+        
+
+
+        
+    
 
 def upload_file(tid, host, port,filename):
     print('Thread ID {:d} connecting to {}:{:d}'.format(tid, host, port))

@@ -6,4 +6,5 @@ class Magnet:
         self.tracker = tracker_
         self.hash_code = hash_code_
     #write into the file
-    
+    def mapping():
+         
