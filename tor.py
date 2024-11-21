@@ -5,6 +5,7 @@ import piece
 piece_size = 512000
 
 
+
 class torrent:
     def __init__(self, tracker_IP, piece_lngth, piece_cnt, file_num, tot_siz):
         self.tracker_ip = tracker_IP
@@ -28,5 +29,18 @@ class torrent:
         
     def set_tracker(self, trackerip):
         self.tracker_ip = trackerip
-
     
+    def eq(self, other):
+        if isinstance(other, torrent):
+            return (
+                self.tracker_ip == other.tracker_ip
+                and self.piece_length == other.piece_length
+                and self.piece_count == other.piece_count
+                and self.file_num == other.file_num
+                and self.total_size == other.total_size
+            )
+        return False 
+    
+    
+    def hash_code(self):
+        return hash(self.tracker_ip, self.piece_count, self.piece_count, self.file_num, self.total_size)
