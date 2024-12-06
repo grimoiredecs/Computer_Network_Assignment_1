@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2301
+    },
+    "info": {
+        "name": "bencode.py",
+        "length": 224,
+        "piece_length": 524288,
+        "pieces": [
+            "a34cb978820ebf806f47df3f489cd529b3cbead0"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

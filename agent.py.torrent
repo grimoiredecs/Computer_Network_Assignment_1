@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2450
+    },
+    "info": {
+        "name": "agent.py",
+        "length": 61,
+        "piece_length": 524288,
+        "pieces": [
+            "83ee977eaa9767043acc8e96622b2a9178600496"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

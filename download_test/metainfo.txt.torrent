@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2301
+    },
+    "info": {
+        "name": "metainfo.txt",
+        "length": 8,
+        "piece_length": 524288,
+        "pieces": [
+            "099a8503a2d903d87b2105e577b831302ff98065"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

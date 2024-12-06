@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2000
+    },
+    "info": {
+        "name": "peer.py",
+        "length": 1570,
+        "piece_length": 51200,
+        "pieces": [
+            "af85dc221ea7ed00f1c84751ea0c5ce746b8b6ce"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

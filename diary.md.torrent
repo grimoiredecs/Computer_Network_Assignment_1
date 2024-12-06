@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2450
+    },
+    "info": {
+        "name": "diary.md",
+        "length": 590,
+        "piece_length": 524288,
+        "pieces": [
+            "90ef3749d58dbed5de50100662252364c164c97b"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

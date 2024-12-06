@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2004
+    },
+    "info": {
+        "name": "main.py",
+        "length": 65,
+        "pieces": [
+            "2bd1931e2ddead4087cbbf7e8ecf514b85e479a5"
+        ],
+        "piece_length": 65
+    },
+    "comment": "Simple torrent file.",
+    "created_by": "P2P System"
+}

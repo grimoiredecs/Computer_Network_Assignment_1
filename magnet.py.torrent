@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2000
+    },
+    "info": {
+        "name": "magnet.py",
+        "length": 224,
+        "pieces": [
+            "8e793c7ea8153829504cbc1d6adb889bb84c1648"
+        ],
+        "piece_length": 224
+    },
+    "comment": "Simple torrent file.",
+    "created_by": "P2P System"
+}
