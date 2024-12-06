@@ -66,6 +66,7 @@ class Peer:
                             conn.sendall(chunk)
                             bytes_sent += len(chunk)
                     print(f"Sent entire file {file_name} to {addr}")
+                    return #done
                 else:
                     response = {'error': 'File not found here.'}
                     conn.sendall(pickle.dumps(response))
