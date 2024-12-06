@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2020
+    },
+    "info": {
+        "name": "tor.py",
+        "length": 663,
+        "piece_length": 51200,
+        "pieces": [
+            "8a492bf293c46f78397147ef510b51e3ac0a2535"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

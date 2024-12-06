@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2020
+    },
+    "info": {
+        "name": "piece.py",
+        "length": 23,
+        "piece_length": 51200,
+        "pieces": [
+            "92235813a28a79f7b064e02b467496f43f139ea9"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

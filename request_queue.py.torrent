@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2020
+    },
+    "info": {
+        "name": "request_queue.py",
+        "length": 28,
+        "piece_length": 51200,
+        "pieces": [
+            "547870d8c76a8f171c95cbccdad55f26d2c6baac"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

@@ -1,0 +1,14 @@
+{
+    "announce": {
+        "host": "192.168.1.100",
+        "port": 8000
+    },
+    "info": {
+        "name": "main.txt",
+        "length": 0,
+        "piece_length": 51200,
+        "pieces": []
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

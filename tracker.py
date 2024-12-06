@@ -1,9 +1,44 @@
 import socket
+import tor
 import json
+import time
 from threading import Thread
 
+client_list = []
+class list_of_torrs:
+    def __init__(self):
+        self.torrs = []
+    
+    def add_torr(self, torr):
+        self.torrs.append(torr)
+        
+    def remove_torr(self, torr):
+        self.torrs.remove(torr)
+    
 
 class Tracker:
+    def peer_benchmark(self, peer):
+        """
+        Benchmark the peer's download speed.
+        :param peer: Peer object.
+        :return: Download speed in bytes per second.
+        """
+        start_time = time.time()
+        peer.download()
+        end_time = time.time()
+        return peer.total_downloaded / (end_time - start_time)
+    
+    def recv(self, conn):
+        """
+        Receive data from a connection.
+        :param conn: Connection object.
+        :return: Received data as a string.
+        """
+        start = time.time()
+        data = conn.recv(1024)
+        end = time.time()
+        print(f"Received {len(data)} bytes in {end - start:.2f} seconds")
+        return data.decode("utf-8")
     def __init__(self, ip, port=330):
         self.ip = ip
         self.port = port
@@ -18,6 +53,7 @@ class Tracker:
         :param conn: Socket connection object.
         """
         print(f"Connection received from: {addr}")
+
         try:
             while True:
                 data = conn.recv(1024).decode("utf-8")

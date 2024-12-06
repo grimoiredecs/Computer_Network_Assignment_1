@@ -1,0 +1,19 @@
+{
+    "tracker_ip": "tracker.example.com",
+    "piece_length": 524288,
+    "files": [
+        {
+            "name": "main.txt",
+            "length": 1024
+        },
+        {
+            "name": "image.jpg",
+            "length": 2048
+        }
+    ],
+    "total_size": 3072,
+    "pieces": [
+        "1234567812345678123456781234567812345678",
+        "90abcdef90abcdef90abcdef90abcdef90abcdef"
+    ]
+}

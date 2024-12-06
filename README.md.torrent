@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2020
+    },
+    "info": {
+        "name": "README.md",
+        "length": 32,
+        "piece_length": 51200,
+        "pieces": [
+            "d69deb0227deb25546b3829da9cd6edd23c17868"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

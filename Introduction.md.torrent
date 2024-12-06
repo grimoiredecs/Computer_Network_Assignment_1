@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2020
+    },
+    "info": {
+        "name": "Introduction.md",
+        "length": 177,
+        "piece_length": 51200,
+        "pieces": [
+            "c9efa093be0b8accca1d24c13de8ed235406eb2f"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

@@ -22,7 +22,6 @@ class peer:
         client_socket.connect((host, port))
         print('Connected to {}:{:d}'.format(host, port))
         return client_socket
-    
     def generate_torrent(self, file_path):
         with open(file_path, "rb") as f:
             file_data = f.read()

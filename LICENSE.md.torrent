@@ -1,0 +1,16 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 2020
+    },
+    "info": {
+        "name": "LICENSE.md",
+        "length": 35142,
+        "piece_length": 524288,
+        "pieces": [
+            "d87b2d684be4c44fc2a608a4fc859f96c8ee7cc9"
+        ]
+    },
+    "comment": "Simplified torrent file.",
+    "created_by": "P2P System"
+}

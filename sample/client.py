@@ -9,6 +9,7 @@ def new_connection(tid, host, port):
 
     client_socket = socket.socket()
     client_socket.connect((host, port))
+    
 
     # Demo sleep time for fun (dummy command)
     for i in range(0,3):
