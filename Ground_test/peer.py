@@ -307,10 +307,9 @@ if __name__ == "__main__":
             print("1. Connect to a tracker")
             print("2. Get list of available torrents")
             print("3. Share a file")
-            print("4. (Optional) Download a file using .torrent file (if needed)")
-            print("5. Download a file by ID (choose peer)")
-            print("6. Handshake with a peer (test connectivity)")
-            print("7. Quit")
+            print("4. Download a file by ID (choose peer)")
+            print("5. Handshake with a peer (test connectivity)")
+            print("6. Quit")
 
             choice = input("Enter your choice: ").strip()
             if choice == '1':
@@ -325,14 +324,13 @@ if __name__ == "__main__":
                     peer.share_file(file_path)
                 else:
                     print("File not found.")
-            elif choice == '4':
                 # If needed, implement start_download(torrent_file_path)
                 torrent_file_path = input("Enter the torrent file path: ").strip()
                 if os.path.isfile(torrent_file_path):
                     peer.start_download(torrent_file_path)
                 else:
                     print("Torrent file not found.")
-            elif choice == '5':
+            elif choice == '4':
                 if not peer.available_torrents:
                     print("No available torrents. Please get the list first.")
                     continue
@@ -342,11 +340,11 @@ if __name__ == "__main__":
                     peer.start_download_by_id(torrent_id)
                 else:
                     print("Invalid torrent ID.")
-            elif choice == '6':
+            elif choice == '5':
                 peer_host = input("Enter the peer's IP address: ").strip()
                 peer_port = int(input("Enter the peer's port number: ").strip())
                 peer.handshake_with_peer(peer_host, peer_port)
-            elif choice == '7':
+            elif choice == '6':
                 print("Exiting.")
                 break
             else:
