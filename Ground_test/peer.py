@@ -14,7 +14,7 @@ class Peer:
         self.shared_files = {}      # {info_hash: torrent}
         self.tracker_host = None
         self.tracker_port = None
-        self.available_torrents = {}  # {torrent_id: (info_hash, torrent_info_dict_with_peers)}
+        self.available_torrents = {}  # {torrent_id: (info_hash, {name, length, peers})}
         self.connected_trackers = set()
 
     def start_server(self):
@@ -46,15 +46,26 @@ class Peer:
                 if info_hash in self.shared_files:
                     torrent_info = self.shared_files[info_hash]['info']
                     file_name = torrent_info['name']
-                    try:
-                        with open(file_name, 'rb') as f:
-                            file_data = f.read()
-                        response = {'file_data': file_data}
-                        conn.sendall(pickle.dumps(response))
-                        print(f"Sent entire file {file_name} to {addr}")
-                    except Exception as e:
-                        response = {'error': f"Could not read file: {e}"}
-                        conn.sendall(pickle.dumps(response))
+                    # Send file_info first
+                    file_size = torrent_info['length']
+                    file_info_msg = {
+                        'type': 'file_info',
+                        'name': file_name,
+                        'length': file_size
+                    }
+                    conn.sendall(pickle.dumps(file_info_msg))
+
+                    # Then send the file in chunks
+                    with open(file_name, 'rb') as f:
+                        chunk_size = 1024*64
+                        bytes_sent = 0
+                        while True:
+                            chunk = f.read(chunk_size)
+                            if not chunk:
+                                break
+                            conn.sendall(chunk)
+                            bytes_sent += len(chunk)
+                    print(f"Sent entire file {file_name} to {addr}")
                 else:
                     response = {'error': 'File not found here.'}
                     conn.sendall(pickle.dumps(response))
@@ -86,7 +97,7 @@ class Peer:
                     print("Available torrents:")
                     self.available_torrents = {}
                     for idx, (info_hash, t_info) in enumerate(torrents.items()):
-                        # t_info includes 'peers' now
+                        # t_info includes 'peers': a list of (host, port)
                         self.available_torrents[idx] = (info_hash, t_info)
                         print(f"ID: {idx}")
                         print(f"  Info Hash: {info_hash}")
@@ -104,55 +115,7 @@ class Peer:
             self.tracker_host = None
             self.tracker_port = None
 
-    def start_download_by_id(self, torrent_id):
-        if torrent_id not in self.available_torrents:
-            print("Invalid torrent ID.")
-            return
-        info_hash, t_info = self.available_torrents[torrent_id]
-        # t_info includes 'peers': a list of (host, port) who have the file
-        if not t_info['peers']:
-            print("No peers have this file.")
-            return
-        # Let's pick the first peer for simplicity
-        target_peer = t_info['peers'][0]
-        self.simple_download(info_hash, t_info['name'], target_peer)
-
-    def simple_download(self, info_hash, file_name, target_peer):
-        peer_host, peer_port = target_peer
-        # First do a handshake test
-        if not self.handshake_with_peer(peer_host, peer_port):
-            print("Handshake failed. Cannot download.")
-            return
-        # If handshake succeeded, request the file
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(5)
-                s.connect((peer_host, peer_port))
-                # Already handshaked before? The instructions didn't specify a persistent connection.
-                # We'll do the handshake test again or skip straight to request_file?
-                # For simplicity, do a second handshake (or trust that peer is ready)
-                # Actually, to follow instructions strictly: handshake again isn't stated.
-                # Let's trust the peer. If we need a real scenario, we'd do handshake again.
-                # Just send 'request_file' now.
-                message = {'type': 'request_file', 'info_hash': info_hash}
-                s.sendall(pickle.dumps(message))
-                response_data = s.recv(50*1024*1024)  # large buffer, arbitrary
-                if not response_data:
-                    print("No data received from the peer.")
-                    return
-                response = pickle.loads(response_data)
-                if 'file_data' in response:
-                    file_data = response['file_data']
-                    with open(f"downloaded_{file_name}", 'wb') as f:
-                        f.write(file_data)
-                    print(f"File {file_name} downloaded successfully.")
-                else:
-                    print(f"Error receiving file: {response.get('error', 'Unknown error')}")
-        except Exception as e:
-            print(f"Failed to download from {peer_host}:{peer_port}: {e}")
-
     def handshake_with_peer(self, peer_host, peer_port):
-        # Attempt a handshake test with the given peer
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.settimeout(5)
@@ -174,6 +137,80 @@ class Peer:
             print(f"Failed to handshake with peer {peer_host}:{peer_port}: {e}")
             return False
 
+    def download_from_peer(self, info_hash, file_name, peer_host, peer_port):
+        # First handshake test
+        if not self.handshake_with_peer(peer_host, peer_port):
+            print("Handshake failed, cannot download.")
+            return
+        # Now request the file
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(5)
+                s.connect((peer_host, peer_port))
+                # Directly send request_file
+                req_msg = {'type': 'request_file', 'info_hash': info_hash}
+                s.sendall(pickle.dumps(req_msg))
+
+                # First receive the file_info message
+                file_info_data = s.recv(4096)
+                if not file_info_data:
+                    print("No file info received from peer.")
+                    return
+                file_info = pickle.loads(file_info_data)
+                if file_info.get('type') != 'file_info':
+                    print("Did not receive file_info message.")
+                    return
+                remote_file_name = file_info['name']
+                file_length = file_info['length']
+
+                # Prepare to receive the file in chunks
+                received = 0
+                chunk_size = 1024*64
+                # Open output file
+                with open(f"downloaded_{remote_file_name}", 'wb') as f:
+                    while received < file_length:
+                        chunk = s.recv(min(chunk_size, file_length - received))
+                        if not chunk:
+                            print("Connection lost during file transfer.")
+                            return
+                        f.write(chunk)
+                        received += len(chunk)
+                        self.show_progress(received, file_length)
+                print(f"\nFile {remote_file_name} downloaded successfully.")
+        except Exception as e:
+            print(f"Failed to download from {peer_host}:{peer_port}: {e}")
+
+    def show_progress(self, downloaded, total):
+        # Simple text progress bar
+        percent = (downloaded / total) * 100
+        bar_length = 50
+        filled_length = int(bar_length * downloaded // total)
+        bar = '=' * filled_length + '-' * (bar_length - filled_length)
+        print(f"\rDownloading: |{bar}| {percent:.2f}% ({downloaded}/{total} bytes)", end='', flush=True)
+
+    def start_download_by_id(self, torrent_id):
+        if torrent_id not in self.available_torrents:
+            print("Invalid torrent ID.")
+            return
+        info_hash, t_info = self.available_torrents[torrent_id]
+        if not t_info['peers']:
+            print("No peers have this file.")
+            return
+        # Let user choose a peer to download from
+        print("Choose a peer to download from:")
+        for i, p in enumerate(t_info['peers']):
+            print(f"{i}. {p[0]}:{p[1]}")
+        choice_str = input("Enter peer number: ").strip()
+        if not choice_str.isdigit():
+            print("Invalid choice.")
+            return
+        choice = int(choice_str)
+        if choice < 0 or choice >= len(t_info['peers']):
+            print("Invalid choice.")
+            return
+        peer_host, peer_port = t_info['peers'][choice]
+        self.download_from_peer(info_hash, t_info['name'], peer_host, peer_port)
+
     def share_file(self, file_path):
         torrent = self.create_torrent_file(file_path)
         info_str = json.dumps(torrent['info'], sort_keys=True)
@@ -188,7 +225,7 @@ class Peer:
             tracker_host = input("Enter the tracker's IP address: ").strip()
             tracker_port = int(input("Enter the tracker's port number: ").strip())
             self.connect_to_tracker(tracker_host, tracker_port)
-        # Announce to tracker that we have the file
+        # Announce to tracker
         self.announce_to_tracker(info_hash, event='completed')
 
     def create_torrent_file(self, file_path, piece_length=512*1024):
@@ -211,8 +248,8 @@ class Peer:
             "info": {
                 "name": os.path.basename(file_path),
                 "length": total_length,
-                "pieces": [piece_hash],
-                "piece_length": total_length
+                "piece_length": total_length,
+                "pieces": [piece_hash]
             },
             "comment": "Simple torrent file.",
             "created_by": "P2P System"
@@ -251,12 +288,12 @@ class Peer:
             return []
 
     def stop_all_transfers(self):
-        # In this simplified version, no 'stopped' event logic is implemented.
+        # In this simplified version: no 'stopped' event logic implemented
         pass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='P2P Peer')
-    parser.add_argument('--host', default='127.0.0.1', help='Peer host')
+    parser.add_argument('--host', default='127.0.0.1', help='Peer host (default: 127.0.0.1)')
     parser.add_argument('--port', type=int, required=True, help='Peer port')
     args = parser.parse_args()
 
@@ -270,8 +307,8 @@ if __name__ == "__main__":
             print("1. Connect to a tracker")
             print("2. Get list of available torrents")
             print("3. Share a file")
-            print("4. Download a file using a .torrent file (not needed if we just rely on tracker info)")
-            print("5. Download a file by ID")
+            print("4. (Optional) Download a file using .torrent file (if needed)")
+            print("5. Download a file by ID (choose peer)")
             print("6. Handshake with a peer (test connectivity)")
             print("7. Quit")
 
@@ -289,7 +326,7 @@ if __name__ == "__main__":
                 else:
                     print("File not found.")
             elif choice == '4':
-                # If needed, user can still provide a .torrent file to download from
+                # If needed, implement start_download(torrent_file_path)
                 torrent_file_path = input("Enter the torrent file path: ").strip()
                 if os.path.isfile(torrent_file_path):
                     peer.start_download(torrent_file_path)

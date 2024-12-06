@@ -8,7 +8,7 @@ class Tracker:
     def __init__(self, host='0.0.0.0', port=8000):
         self.host = host
         self.port = port
-        # Structure: {info_hash: {'peers': set((host, port)), 'info': torrent_info}}
+        # {info_hash: {'peers': set((host, port)), 'info': torrent_info}}
         self.torrents = {}
         self.lock = threading.Lock()
 
@@ -32,7 +32,7 @@ class Tracker:
             message = pickle.loads(data)
             msg_type = message.get('type', None)
             if msg_type == 'announce':
-                self._handle_announce(conn, addr, message)
+                self._handle_announce(conn, message)
             elif msg_type == 'get_torrents':
                 self._handle_get_torrents(conn)
             else:
@@ -43,7 +43,7 @@ class Tracker:
         finally:
             conn.close()
 
-    def _handle_announce(self, conn, addr, message):
+    def _handle_announce(self, conn, message):
         info_hash = message['info_hash']
         peer_host = message['host']
         peer_port = message['port']
@@ -51,7 +51,6 @@ class Tracker:
         with self.lock:
             if info_hash not in self.torrents:
                 self.torrents[info_hash] = {'peers': set(), 'info': None}
-            # Add this peer to the set of peers that have the file
             self.torrents[info_hash]['peers'].add((peer_host, peer_port))
             torrent_info = message.get('torrent_info')
             if torrent_info:
@@ -69,14 +68,14 @@ class Tracker:
         with self.lock:
             torrents_info = {}
             for info_hash, data in self.torrents.items():
-                torrent_info = data['info']
-                if torrent_info:
-                    # Include the list of peers who have this file
+                t_info = data['info']
+                if t_info:
+                    # Include peers who have this file
                     peers_list = list(data['peers'])
                     torrents_info[info_hash] = {
-                        'name': torrent_info.get('name', 'Unknown'),
-                        'length': torrent_info.get('length', 0),
-                        'peers': peers_list  # Return the actual peers (host, port)
+                        'name': t_info.get('name', 'Unknown'),
+                        'length': t_info.get('length', 0),
+                        'peers': peers_list
                     }
             response = {'torrents': torrents_info}
         conn.sendall(pickle.dumps(response))
