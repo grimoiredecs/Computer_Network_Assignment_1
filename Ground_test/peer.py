@@ -302,8 +302,8 @@ class Peer:
 
         torrent = {
             "announce": {
-                "host": tracker_host,
-                "port": tracker_port
+                "host": self.host,
+                "port": self.port,
             },
             "info": {
                 "name": os.path.basename(file_path),
@@ -311,8 +311,6 @@ class Peer:
                 "piece_length": piece_length,
                 "pieces": pieces
             },
-            "comment": "Multi-piece torrent file.",
-            "created_by": "P2P System"
         }
         return torrent
 

@@ -85,12 +85,13 @@ class Tracker:
             torrent_info = message.get('torrent_info')
             if torrent_info:
                 self.torrents[info_hash]['info'] = torrent_info
-                # Write out the torrent file at tracker's side
-                self._write_torrent_file(info_hash, torrent_info)
+                # Pass peer_host and peer_port to the _write_torrent_file method
+                self._write_torrent_file(info_hash, torrent_info, peer_host, peer_port)
 
             all_peers = self.torrents[info_hash]['peers'].copy()
             all_peers.discard((peer_host, peer_port))
             return {'peers': list(all_peers)}
+
 
     def _handle_get_torrents(self):
         with self.lock:
@@ -108,20 +109,19 @@ class Tracker:
                     }
             return {'torrents': torrents_info}
 
-    def _write_torrent_file(self, info_hash, torrent_info):
-        # Construct a torrent dictionary similar to what the peer creates
-        # Use the tracker's host and port as announce
+    def _write_torrent_file(self, info_hash, torrent_info, peer_host, peer_port):
+        # Construct the torrent dictionary
         torrent = {
             "announce": {
-                "host": self.host,
-                "port": self.port
+                "host": peer_host,
+                "port": peer_port
             },
             "info": torrent_info,
             "comment": "Torrent file stored by tracker",
             "created_by": "Tracker"
         }
 
-        # Save as <info_hash>.torrent
+        # Save the file as <info_hash>.torrent
         torrent_file_name = f"{info_hash}.torrent"
         with open(torrent_file_name, 'w') as tf:
             json.dump(torrent, tf, indent=4)

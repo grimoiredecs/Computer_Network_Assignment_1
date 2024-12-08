@@ -1,7 +1,7 @@
 {
     "announce": {
         "host": "192.168.0.119",
-        "port": 3000
+        "port": 3088
     },
     "info": {
         "name": "client.py",
@@ -10,7 +10,5 @@
         "pieces": [
             "6d7db963e65553938747519bbb2b92e009286429"
         ]
-    },
-    "comment": "Multi-piece torrent file.",
-    "created_by": "P2P System"
+    }
 }
