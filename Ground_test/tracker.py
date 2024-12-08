@@ -38,7 +38,6 @@ class Tracker:
     def __init__(self, host, port=8000):
         self.host = host
         self.port = port
-        # {info_hash: {'peers': set(), 'info': torrent_info}}
         self.torrents = {}
         self.lock = threading.Lock()
 
