@@ -1,16 +1,16 @@
 {
     "announce": {
         "host": "192.168.0.119",
-        "port": 2451
+        "port": 3000
     },
     "info": {
         "name": "client.py",
         "length": 1343,
-        "piece_length": 1343,
+        "piece_length": 524288,
         "pieces": [
             "6d7db963e65553938747519bbb2b92e009286429"
         ]
     },
-    "comment": "Simple torrent file.",
+    "comment": "Multi-piece torrent file.",
     "created_by": "P2P System"
 }

@@ -1,14 +1,73 @@
+
 import socket
 import threading
-import pickle
 import argparse
 import time
 
+# Include helper functions here or ensure they are imported
+import pickle
+import struct
+
+
+def send_msg(conn, obj):
+    data = pickle.dumps(obj)
+    length_prefix = struct.pack('!I', len(data))
+    conn.sendall(length_prefix + data)
+
+def recv_all(conn, length):
+    chunks = []
+    bytes_recd = 0
+    while bytes_recd < length:
+        chunk = conn.recv(length - bytes_recd)
+        if not chunk:
+            return None
+        chunks.append(chunk)
+        bytes_recd += len(chunk)
+    return b''.join(chunks)
+
+def recv_msg(conn):
+    # Read length prefix
+    length_prefix = recv_all(conn, 4)
+    if not length_prefix:
+        return None
+    msg_length = struct.unpack('!I', length_prefix)[0]
+    data = recv_all(conn, msg_length)
+    if not data:
+        return None
+    return pickle.loads(data)
+
+
+def send_msg(conn, obj):
+    data = pickle.dumps(obj)
+    length_prefix = struct.pack('!I', len(data))
+    conn.sendall(length_prefix + data)
+
+def recv_all(conn, length):
+    chunks = []
+    bytes_recd = 0
+    while bytes_recd < length:
+        chunk = conn.recv(length - bytes_recd)
+        if not chunk:
+            return None
+        chunks.append(chunk)
+        bytes_recd += len(chunk)
+    return b''.join(chunks)
+
+def recv_msg(conn):
+    length_prefix = recv_all(conn, 4)
+    if not length_prefix:
+        return None
+    msg_length = struct.unpack('!I', length_prefix)[0]
+    data = recv_all(conn, msg_length)
+    if not data:
+        return None
+    return pickle.loads(data)
+
 class Tracker:
-    def __init__(self, host='0.0.0.0', port=8000):
+    def __init__(self, host, port=8000):
         self.host = host
         self.port = port
-        # {info_hash: {'peers': set((host, port)), 'info': torrent_info}}
+        # {info_hash: {'peers': set(), 'info': torrent_info}}
         self.torrents = {}
         self.lock = threading.Lock()
 
@@ -26,24 +85,24 @@ class Tracker:
 
     def _handle_client(self, conn, addr):
         try:
-            data = conn.recv(8192)
-            if not data:
+            message = recv_msg(conn)
+            if not message:
                 return
-            message = pickle.loads(data)
             msg_type = message.get('type', None)
             if msg_type == 'announce':
-                self._handle_announce(conn, message)
+                response = self._handle_announce(message)
             elif msg_type == 'get_torrents':
-                self._handle_get_torrents(conn)
+                response = self._handle_get_torrents()
             else:
                 response = {'error': 'Unknown message type'}
-                conn.sendall(pickle.dumps(response))
+
+            send_msg(conn, response)
         except Exception as e:
             print(f"Error handling client {addr}: {e}")
         finally:
             conn.close()
 
-    def _handle_announce(self, conn, message):
+    def _handle_announce(self, message):
         info_hash = message['info_hash']
         peer_host = message['host']
         peer_port = message['port']
@@ -56,29 +115,25 @@ class Tracker:
             if torrent_info:
                 self.torrents[info_hash]['info'] = torrent_info
 
-        # Respond with a list of other peers (excluding this one)
-        with self.lock:
             all_peers = self.torrents[info_hash]['peers'].copy()
             all_peers.discard((peer_host, peer_port))
-            response = {'peers': list(all_peers)}
-        conn.sendall(pickle.dumps(response))
-        print(f"Peer {(peer_host,peer_port)} announced having {info_hash}")
+            return {'peers': list(all_peers)}
 
-    def _handle_get_torrents(self, conn):
+    def _handle_get_torrents(self):
         with self.lock:
             torrents_info = {}
             for info_hash, data in self.torrents.items():
                 t_info = data['info']
                 if t_info:
-                    # Include peers who have this file
                     peers_list = list(data['peers'])
                     torrents_info[info_hash] = {
                         'name': t_info.get('name', 'Unknown'),
                         'length': t_info.get('length', 0),
-                        'peers': peers_list
+                        'peers': peers_list,
+                        'piece_length': t_info.get('piece_length'),
+                        'pieces': t_info.get('pieces', [])
                     }
-            response = {'torrents': torrents_info}
-        conn.sendall(pickle.dumps(response))
+            return {'torrents': torrents_info}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='P2P Tracker')
