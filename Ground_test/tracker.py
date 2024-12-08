@@ -1,41 +1,12 @@
-
 import socket
 import threading
+import pickle
 import argparse
 import time
-
-# Include helper functions here or ensure they are imported
-import pickle
+import json
+import hashlib
 import struct
-
-
-def send_msg(conn, obj):
-    data = pickle.dumps(obj)
-    length_prefix = struct.pack('!I', len(data))
-    conn.sendall(length_prefix + data)
-
-def recv_all(conn, length):
-    chunks = []
-    bytes_recd = 0
-    while bytes_recd < length:
-        chunk = conn.recv(length - bytes_recd)
-        if not chunk:
-            return None
-        chunks.append(chunk)
-        bytes_recd += len(chunk)
-    return b''.join(chunks)
-
-def recv_msg(conn):
-    # Read length prefix
-    length_prefix = recv_all(conn, 4)
-    if not length_prefix:
-        return None
-    msg_length = struct.unpack('!I', length_prefix)[0]
-    data = recv_all(conn, msg_length)
-    if not data:
-        return None
-    return pickle.loads(data)
-
+import os
 
 def send_msg(conn, obj):
     data = pickle.dumps(obj)
@@ -64,7 +35,7 @@ def recv_msg(conn):
     return pickle.loads(data)
 
 class Tracker:
-    def __init__(self, host, port=8000):
+    def __init__(self, host='0.0.0.0', port=8000):
         self.host = host
         self.port = port
         # {info_hash: {'peers': set(), 'info': torrent_info}}
@@ -114,6 +85,8 @@ class Tracker:
             torrent_info = message.get('torrent_info')
             if torrent_info:
                 self.torrents[info_hash]['info'] = torrent_info
+                # Write out the torrent file at tracker's side
+                self._write_torrent_file(info_hash, torrent_info)
 
             all_peers = self.torrents[info_hash]['peers'].copy()
             all_peers.discard((peer_host, peer_port))
@@ -134,6 +107,25 @@ class Tracker:
                         'pieces': t_info.get('pieces', [])
                     }
             return {'torrents': torrents_info}
+
+    def _write_torrent_file(self, info_hash, torrent_info):
+        # Construct a torrent dictionary similar to what the peer creates
+        # Use the tracker's host and port as announce
+        torrent = {
+            "announce": {
+                "host": self.host,
+                "port": self.port
+            },
+            "info": torrent_info,
+            "comment": "Torrent file stored by tracker",
+            "created_by": "Tracker"
+        }
+
+        # Save as <info_hash>.torrent
+        torrent_file_name = f"{info_hash}.torrent"
+        with open(torrent_file_name, 'w') as tf:
+            json.dump(torrent, tf, indent=4)
+        print(f"Tracker saved torrent file as {torrent_file_name}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='P2P Tracker')

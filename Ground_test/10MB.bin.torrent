@@ -1,0 +1,35 @@
+{
+    "announce": {
+        "host": "192.168.0.119",
+        "port": 3000
+    },
+    "info": {
+        "name": "10MB.bin",
+        "length": 10000000,
+        "piece_length": 524288,
+        "pieces": [
+            "1f9a35187d546b6f4e8cc9105b3999a73a5036f3",
+            "2b46fea9088e1a19d2d6ee3ae483ad2192038c8c",
+            "66606d2e56da9377498db25587a592b6faeebaf3",
+            "54dd77432d949318078ac14270529b32e5c1693c",
+            "de1703c0ea9d211f79273ca34f21f73b12824a9c",
+            "63c682e2fcf0c41f4b3c3b5ef5c3ddfc2f8008d0",
+            "30f16a84b7468f3bad07c9194936faa4bccd22ef",
+            "8caf544ed14a283a8cd31c90795e192b232b70a6",
+            "f0519a5ad812fe42f5e89526c08fac72a5383f6e",
+            "870a9708d297fc4d64458f76d0c29853305e0c13",
+            "f21ef3313746ac4cc5f970c5ba8dc3d2c29f6d5f",
+            "8945160f84398fceea125965706f8d69dd76d43c",
+            "03dc0e53fe80f31b4c0c5715dc023fcb1737e5e2",
+            "9eb4ebdcb88b4e6151a6d0aa88d0ff7f4508e81d",
+            "9356d070d68ce8b7c477ba7bf6b212f6c4e0f1aa",
+            "846248314b0a285a8494614a9ef4e59288abef8e",
+            "d9948f3aed4c8647106009fa4d1217c51c09a531",
+            "af227e78aeb2e631e136c9ab2acf562aa6390345",
+            "9f95efa465e4dda8f9e9ffeb40ec0611db61d522",
+            "613b0cd4b147f11af9770b98390c7000617cf1ec"
+        ]
+    },
+    "comment": "Multi-piece torrent file.",
+    "created_by": "P2P System"
+}
