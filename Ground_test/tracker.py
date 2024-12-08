@@ -35,7 +35,7 @@ def recv_msg(conn):
     return pickle.loads(data)
 
 class Tracker:
-    def __init__(self, host='0.0.0.0', port=8000):
+    def __init__(self, host, port=8000):
         self.host = host
         self.port = port
         # {info_hash: {'peers': set(), 'info': torrent_info}}
