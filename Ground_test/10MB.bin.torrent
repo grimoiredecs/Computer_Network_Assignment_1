@@ -1,7 +1,7 @@
 {
     "announce": {
         "host": "192.168.0.119",
-        "port": 3088
+        "port": 3099
     },
     "info": {
         "name": "10MB.bin",

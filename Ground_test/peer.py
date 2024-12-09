@@ -363,7 +363,7 @@ if __name__ == "__main__":
             print("1. Connect to a tracker")
             print("2. Get list of available torrents")
             print("3. Share a file")
-            print("4. Download a file by ID (multi-piece)")
+            print("4. Download a file by ID")
             print("5. Handshake with a peer (test connectivity)")
             print("6. Quit")
 
