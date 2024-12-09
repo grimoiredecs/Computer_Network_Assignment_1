@@ -1,12 +1,12 @@
 import socket
 import threading
-import pickle
 import argparse
 import time
 import json
 import hashlib
-import struct
 import os
+import pickle
+import struct
 
 def send_msg(conn, obj):
     data = pickle.dumps(obj)
@@ -35,9 +35,10 @@ def recv_msg(conn):
     return pickle.loads(data)
 
 class Tracker:
-    def __init__(self, host, port=8000):
+    def __init__(self, host='0.0.0.0', port=8000):
         self.host = host
         self.port = port
+        # {info_hash: {'peers': set(), 'info': torrent_info}}
         self.torrents = {}
         self.lock = threading.Lock()
 
@@ -59,7 +60,10 @@ class Tracker:
             if not message:
                 return
             msg_type = message.get('type', None)
-            if msg_type == 'announce':
+            if msg_type == 'handshake':
+                # Respond to handshake
+                response = {'type': 'handshake_ack', 'message': 'Tracker is valid'}
+            elif msg_type == 'announce':
                 response = self._handle_announce(message)
             elif msg_type == 'get_torrents':
                 response = self._handle_get_torrents()
@@ -84,13 +88,11 @@ class Tracker:
             torrent_info = message.get('torrent_info')
             if torrent_info:
                 self.torrents[info_hash]['info'] = torrent_info
-                # Pass peer_host and peer_port to the _write_torrent_file method
-                self._write_torrent_file(info_hash, torrent_info, peer_host, peer_port)
+                # Optionally, the tracker can save a .torrent file here if desired.
 
             all_peers = self.torrents[info_hash]['peers'].copy()
             all_peers.discard((peer_host, peer_port))
             return {'peers': list(all_peers)}
-
 
     def _handle_get_torrents(self):
         with self.lock:
@@ -107,24 +109,6 @@ class Tracker:
                         'pieces': t_info.get('pieces', [])
                     }
             return {'torrents': torrents_info}
-
-    def _write_torrent_file(self, info_hash, torrent_info, peer_host, peer_port):
-        # Construct the torrent dictionary
-        torrent = {
-            "announce": {
-                "host": peer_host,
-                "port": peer_port
-            },
-            "info": torrent_info,
-            "comment": "Torrent file stored by tracker",
-            "created_by": "Tracker"
-        }
-
-        # Save the file as <info_hash>.torrent
-        torrent_file_name = f"{info_hash}.torrent"
-        with open(torrent_file_name, 'w') as tf:
-            json.dump(torrent, tf, indent=4)
-        print(f"Tracker saved torrent file as {torrent_file_name}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='P2P Tracker')

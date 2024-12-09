@@ -1,35 +1,3 @@
-import pickle
-import struct
-
-def send_msg(conn, obj):
-    data = pickle.dumps(obj)
-    length_prefix = struct.pack('!I', len(data))
-    conn.sendall(length_prefix + data)
-
-def recv_all(conn, length):
-    chunks = []
-    bytes_recd = 0
-    while bytes_recd < length:
-        chunk = conn.recv(length - bytes_recd)
-        if not chunk:
-            return None
-        chunks.append(chunk)
-        bytes_recd += len(chunk)
-    return b''.join(chunks)
-
-def recv_msg(conn):
-    # Read length prefix
-    length_prefix = recv_all(conn, 4)
-    if not length_prefix:
-        return None
-    msg_length = struct.unpack('!I', length_prefix)[0]
-    data = recv_all(conn, msg_length)
-    if not data:
-        return None
-    return pickle.loads(data)
-
-
-
 import socket
 import threading
 import argparse
@@ -132,9 +100,25 @@ class Peer:
             conn.close()
 
     def connect_to_tracker(self, tracker_host, tracker_port):
-        self.tracker_host = tracker_host
-        self.tracker_port = tracker_port
-        print(f"Connected to tracker at {self.tracker_host}:{self.tracker_port}")
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(5)
+                s.connect((tracker_host, tracker_port))
+
+                # Perform handshake to verify tracker
+                handshake_msg = {'type': 'handshake'}
+                send_msg(s, handshake_msg)
+                response = recv_msg(s)
+                if response and response.get('type') == 'handshake_ack':
+                    print(f"Handshake successful with tracker: {response.get('message', 'No message')}")
+                    self.tracker_host = tracker_host
+                    self.tracker_port = tracker_port
+                    print(f"Connected to tracker at {self.tracker_host}:{self.tracker_port}")
+                else:
+                    print("Handshake failed: Invalid tracker response.")
+                    return
+        except Exception as e:
+            print(f"Failed to connect to tracker at {tracker_host}:{tracker_port}: {e}")
 
     def get_torrent_list(self):
         if not self.tracker_host or not self.tracker_port:
@@ -363,7 +347,7 @@ if __name__ == "__main__":
             print("1. Connect to a tracker")
             print("2. Get list of available torrents")
             print("3. Share a file")
-            print("4. Download a file by ID")
+            print("4. Download a file by ID (multi-piece)")
             print("5. Handshake with a peer (test connectivity)")
             print("6. Quit")
 
