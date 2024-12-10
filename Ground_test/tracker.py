@@ -129,7 +129,7 @@ class Tracker:
             while True:
                 message = recv_msg(conn)
                 if not message:
-                    print(f"Peer {peer_host}:{peer_port} disconnected.")
+                   # print(f"Peer {peer_host}:{peer_port} disconnected.")
                     self._remove_peer_from_all_torrents(peer_host, peer_port)
                     break
 
@@ -144,7 +144,7 @@ class Tracker:
                 else:
                     response = {'error': 'Unknown message type'}
                     send_msg(conn, response)
-                    print(f"Received unknown message type from {addr}: {msg_type}")
+                  #  print(f"Received unknown message type from {addr}: {msg_type}")
 
         except Exception as e:
             print(f"Error handling client {addr}: {e}")
@@ -266,7 +266,7 @@ class Tracker:
             for info_hash, data in self.torrents.items():
                 if (peer_host, peer_port) in data['peers']:
                     data['peers'].discard((peer_host, peer_port))
-                    print(f"Peer {peer_host}:{peer_port} removed from torrent {data['info'].get('name')} due to disconnection.")
+                   # print(f"Peer {peer_host}:{peer_port} removed from torrent {data['info'].get('name')} due to disconnection.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='P2P Tracker')
