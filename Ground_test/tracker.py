@@ -95,7 +95,7 @@ class Tracker:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((self.host, self.port))
             s.listen()
-            print(f"Tracker started on {self.host}:{self.port}")
+            #print(f"Tracker started on {self.host}:{self.port}")
             while True:
                 conn, addr = s.accept()
                 threading.Thread(target=self._handle_client, args=(conn, addr), daemon=True).start()
@@ -112,21 +112,18 @@ class Tracker:
         try:
             # Step 1: Receive Handshake from Peer
             handshake_message = recv_msg(conn)
-            if not handshake_message:
-                print(f"No handshake received. Closing connection with {addr}")
-                return
 
             if handshake_message.get('type') != 'handshake':
                 # Invalid handshake
                 error_response = {'type': 'error', 'message': 'Invalid handshake'}
                 send_msg(conn, error_response)
-                print(f"Invalid handshake from {addr}. Connection closed.")
+                #print(f"Invalid handshake from {addr}. Connection closed.")
                 return
 
             # Step 2: Send Handshake Acknowledgment
             handshake_ack = {'type': 'handshake_ack', 'message': 'Handshake successful'}
             send_msg(conn, handshake_ack)
-            print(f"Handshake successful with peer {peer_host}:{peer_port}")
+            #print(f"Handshake successful with peer {peer_host}:{peer_port}")
 
             # Step 3: Enter Loop to Handle Further Messages
             while True:
