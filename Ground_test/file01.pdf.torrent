@@ -1,7 +1,7 @@
 {
     "announce": {
         "host": "192.168.1.9",
-        "port": 2559
+        "port": 2551
     },
     "info": {
         "name": "file01.pdf",
