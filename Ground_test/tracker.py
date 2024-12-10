@@ -5,8 +5,10 @@ import time
 import json
 import hashlib
 import os
+import mmap
 import pickle
 import struct
+from tqdm import tqdm  # Import tqdm for progress bar
 
 def send_msg(conn, obj):
     """
@@ -182,6 +184,8 @@ class Tracker:
                     }
                     self._write_torrent_file(info_hash, torrent_info, peer_host, peer_port)
                     print(f"Torrent added: {torrent_info.get('name')} (Info Hash: {info_hash})")
+                    # Start downloading the torrent automatically
+                    threading.Thread(target=self.download_torrent, args=(info_hash, torrent_info, peer_host, peer_port), daemon=True).start()
                 else:
                     print(f"Announce received for unknown torrent {info_hash} from {peer_host}:{peer_port}")
                     return {'error': 'Unknown torrent.'}
@@ -189,10 +193,10 @@ class Tracker:
             # Add or remove peers based on the event
             if event == 'started':
                 self.torrents[info_hash]['peers'].add((peer_host, peer_port))
-                print(f"Peer {peer_host}:{peer_port} added to torrent {self.torrents[info_hash]['info'].get('name')}")
+             #   print(f"Peer {peer_host}:{peer_port} added to torrent {self.torrents[info_hash]['info'].get('name')}")
             elif event == 'stopped':
                 self.torrents[info_hash]['peers'].discard((peer_host, peer_port))
-                print(f"Peer {peer_host}:{peer_port} removed from torrent {self.torrents[info_hash]['info'].get('name')}")
+               # print(f"Peer {peer_host}:{peer_port} removed from torrent {self.torrents[info_hash]['info'].get('name')}")
             elif event == 'completed':
                 print(f"Peer {peer_host}:{peer_port} completed downloading torrent {self.torrents[info_hash]['info'].get('name')}")
             # Additional events can be handled here
@@ -267,6 +271,77 @@ class Tracker:
                 if (peer_host, peer_port) in data['peers']:
                     data['peers'].discard((peer_host, peer_port))
                    # print(f"Peer {peer_host}:{peer_port} removed from torrent {data['info'].get('name')} due to disconnection.")
+
+    def download_torrent(self, info_hash, torrent_info, peer_host, peer_port):
+        """
+        Download the entire torrented file from the specified peer.
+
+        Args:
+            info_hash (str): The hash identifying the torrent.
+            torrent_info (dict): The torrent's info dictionary.
+            peer_host (str): The peer's IP address.
+            peer_port (int): The peer's port number.
+        """
+        print(f"Starting download of torrent '{torrent_info.get('name')}' from {peer_host}:{peer_port}...")
+
+        piece_length = torrent_info['piece_length']
+        pieces = torrent_info['pieces']
+        total_pieces = len(pieces)
+        file_data_map = {}
+        file_name = torrent_info['name']
+        total_length = torrent_info['length']
+
+        # Initialize tqdm progress bar
+        with tqdm(total=total_pieces, desc=f"Downloading {file_name}", unit="piece") as pbar:
+            for i in range(total_pieces):
+                try:
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                        s.settimeout(10)  # Increased timeout to accommodate slower transfers
+                        s.connect((peer_host, peer_port))
+                        req_msg = {'type': 'request_piece', 'info_hash': info_hash, 'index': i}
+                        send_msg(s, req_msg)
+                        response = recv_msg(s)
+                        if not response:
+                            print("\nNo data received for piece")
+                            return
+                        if 'error' in response:
+                            print(f"\nError receiving piece {i}: {response['error']}")
+                            return
+                        piece_data = response['data']
+                        # Verify piece hash
+                        expected_hash = pieces[i]
+                        actual_hash = hashlib.sha1(piece_data).hexdigest()
+                        if actual_hash == expected_hash:
+                            file_data_map[i] = piece_data
+                            pbar.update(1)  # Update tqdm progress bar
+                        else:
+                            print(f"\nPiece {i} hash mismatch. Download failed.")
+                            return
+                except Exception as e:
+                    print(f"\nFailed to download piece {i} from {peer_host}:{peer_port}: {e}")
+                    return
+
+        # All pieces downloaded and verified
+        downloaded_file_path = f"downloaded_{file_name}"
+
+        try:
+            # Pre-allocate the file with the total length
+            with open(downloaded_file_path, 'wb') as f:
+                f.truncate(total_length)
+
+            # Open the file in read/write binary mode
+            with open(downloaded_file_path, 'r+b') as f:
+                # Memory-map the entire file for writing
+                with mmap.mmap(f.fileno(), length=total_length, access=mmap.ACCESS_WRITE) as m:
+                    offset = 0
+                    for i in range(total_pieces):
+                        piece_data = file_data_map[i]
+                        m[offset:offset+len(piece_data)] = piece_data
+                        offset += len(piece_data)
+
+            print(f"\nFile '{file_name}' assembled successfully and verified as '{downloaded_file_path}'.")
+        except Exception as e:
+            print(f"\nFailed to assemble the file using mmap: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='P2P Tracker')
