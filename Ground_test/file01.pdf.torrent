@@ -1,0 +1,14 @@
+{
+    "announce": {
+        "host": "192.168.1.9",
+        "port": 2559
+    },
+    "info": {
+        "name": "file01.pdf",
+        "length": 226902,
+        "piece_length": 524288,
+        "pieces": [
+            "5580110d1a0ad21e05c20f4d41cae1096e1100ea"
+        ]
+    }
+}
